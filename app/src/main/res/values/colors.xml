@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="tab_floor_unfocus_title_color">#adb7c0</color>
+
+    <color name="tab_floor_focus_title_color">#ffffff</color>
 </resources>
