@@ -3,4 +3,22 @@
 
     <dimen name="round_conner">30px</dimen>
 
+    <dimen name="expand_view_round_conner">25px</dimen>
+
+    <dimen name="expand_view_icon_size">25px</dimen>
+
+    <dimen name="expand_view_width">200px</dimen>
+
+    <dimen name="expand_view_height">50px</dimen>
+
+    <dimen name="expand_icon_horizontal_margin">12px</dimen>
+
+    <dimen name="expand_text_left_margin">6px</dimen>
+
+    <dimen name="expand_text_right_margin">28px</dimen>
+
+    <dimen name="expand_text_size">22px</dimen>
+
+    <dimen name="expand_view_stroke">2px</dimen>
+
 </resources>

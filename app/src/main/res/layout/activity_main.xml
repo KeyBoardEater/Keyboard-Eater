@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_view_group"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:clipChildren="false"
+    android:background="#44444444"
+    android:clipToPadding="false">
 
-    <com.keyboardeater.widget.CenterFocusScrollView
-        android:id="@+id/center_focus_tab_view"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"/>
+    <com.keyboardeater.widget.timeline.view.ExpandWhileFocusedView
+        android:id="@+id/expand_view"
+        android:layout_width="@dimen/expand_view_height"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:layout_height="@dimen/expand_view_height"/>
 
-</RelativeLayout>
+    <com.keyboardeater.widget.timeline.view.ExpandWhileFocusedView
+        android:layout_width="@dimen/expand_view_height"
+        android:focusable="true"
+        android:layout_marginTop="10px"
+        android:focusableInTouchMode="false"
+        android:layout_height="@dimen/expand_view_height"/>
+
+</LinearLayout>

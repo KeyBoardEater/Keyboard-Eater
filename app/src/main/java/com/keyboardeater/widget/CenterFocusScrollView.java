@@ -14,6 +14,8 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,9 +40,13 @@ public class CenterFocusScrollView extends ViewGroup {
 
     public static final int VERTICAL = 1;
 
-    private final AtomicBoolean mInLayoutFlag = new AtomicBoolean();
+    private final AtomicBoolean mOnLayoutFlag = new AtomicBoolean();
+
+    private final AtomicBoolean mOnMeasureFlag = new AtomicBoolean();
 
     private final AtomicInteger offset = new AtomicInteger();
+
+    private final AtomicBoolean isLayout = new AtomicBoolean(false);
 
     private int mTotalLength;
 
@@ -67,6 +73,8 @@ public class CenterFocusScrollView extends ViewGroup {
 
     private int scrollState = STATE_SCROLL_IDLE;
 
+    private final Recycler mRecycler;
+
     public CenterFocusScrollView(Context context) {
         this(context, null);
     }
@@ -78,75 +86,203 @@ public class CenterFocusScrollView extends ViewGroup {
     public CenterFocusScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mFloorScroller = new FloorScroller(context);
+        mRecycler = new Recycler();
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int parentWidth = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
 
-        int parentHeight = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
+        if (mOnMeasureFlag.compareAndSet(false, true)) {
 
-        setMeasuredDimension(parentWidth, parentHeight);
+            int parentWidth = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
 
-        measureChildren(parentWidth, parentHeight);
+            int parentHeight = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
+
+            setMeasuredDimension(parentWidth, parentHeight);
+
+            tryCheckChildIsFullOnMeasure(parentWidth, parentHeight);
+
+//            measureChildren(parentWidth, parentHeight);
+
+            mOnMeasureFlag.set(false);
+        }
     }
 
-    @Override
-    protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {
-        final int size = getChildCount();
-        mTotalLength = 0;
-        for (int i = 0; i < size; ++i) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                measureChild(child, widthMeasureSpec, heightMeasureSpec);
-                LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
-                layoutParams.offset = mTotalLength;
-                mTotalLength += child.getMeasuredWidth();
-                if (i != size - 1) {
-                    mTotalLength += dividerSize;
+//    @Override
+//    protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {
+//        final int size = getChildCount();
+//        mTotalLength = 0;
+//        for (int i = 0; i < size; ++i) {
+//            final View child = getChildAt(i);
+//            if (child.getVisibility() != GONE) {
+//                measureChild(child, widthMeasureSpec, heightMeasureSpec);
+//                LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+//                layoutParams.offset = mTotalLength;
+//                mTotalLength += child.getMeasuredWidth();
+//                if (i != size - 1) {
+//                    mTotalLength += dividerSize;
+//                }
+//            }
+//        }
+//    }
+
+    private void tryCheckChildIsFullOnMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (null == adapter) {
+            return;
+        }
+
+        if (isLayout.compareAndSet(false, true)) {
+
+            final int size = getChildCount();
+
+            final int leftEdge = this.offset.get();
+
+            final int rightEdge = leftEdge + getWidth();
+
+            mTotalLength = 0;
+
+            Log.d(TAG, "tryCheckChildIsFullOnMeasure rightEdge = " + rightEdge + " leftEdge = " + leftEdge);
+
+            for (int i = 0; i < adapter.getItemCount(); i++) {
+                View child = getChildAt(i);
+                if (null == child) {
+                    child = tryGetRecycleViewFromCache();
+                    if (null == child) {
+                        child = adapter.onCreateView(i, this);
+                    }
+
+                    int widthSpec = mOrientation == VERTICAL ? LayoutParams.MATCH_PARENT : LayoutParams.WRAP_CONTENT;
+                    int heightSpec = mOrientation == VERTICAL ? LayoutParams.WRAP_CONTENT : LayoutParams.MATCH_PARENT;
+
+                    LayoutParams layoutParams = new LayoutParams(widthSpec, heightSpec);
+                    addViewInLayout(child, -1, layoutParams, true);
+
+                    adapter.bindView(i, child);
+
+                    measureChild(child, widthMeasureSpec, heightMeasureSpec);
+
+                    Log.d(TAG, "tryCheckChildIsFullOnMeasure child measure size = " + (mOrientation == VERTICAL ? child.getMeasuredHeight() : child.getMeasuredWidth()));
+
+                    layoutParams.offset = mTotalLength;
+                    layoutParams.index = i;
+
+                    final int childLeftEdge = mTotalLength;
+
+                    mTotalLength += mOrientation == VERTICAL ? child.getMeasuredHeight() : child.getMeasuredWidth();
+
+                    Log.d(TAG, "tryCheckChildIsFullOnMeasure rightEdge = " + rightEdge + " leftEdge = " + leftEdge + " childLeftEdge = " + childLeftEdge + " mTotalLength = " + mTotalLength);
+                    if (childLeftEdge > rightEdge || mTotalLength < leftEdge) {
+                        removeViewInLayout(child);
+                        tryRecycleViewToCache(child);
+                    }
+
+                    if (i != size - 1) {
+                        mTotalLength += dividerSize;
+                    }
+                } else {
+
+                    final int childLeftEdge = mTotalLength;
+
+                    measureChild(child, widthMeasureSpec, heightMeasureSpec);
+
+                    adapter.bindView(i, child);
+
+                    mTotalLength += child.getMeasuredWidth();
+
+                    LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+                    layoutParams.offset = mTotalLength;
+                    mTotalLength += child.getMeasuredWidth();
+                    if (i != size - 1) {
+                        mTotalLength += dividerSize;
+                    }
+
+                    Log.d(TAG, "tryCheckChildIsFullOnMeasure rightEdge = " + rightEdge + " leftEdge = " + leftEdge + " childLeftEdge = " + childLeftEdge + " mTotalLength = " + mTotalLength);
+                    if (childLeftEdge > rightEdge || mTotalLength < leftEdge) {
+                        removeViewInLayout(child);
+                        tryRecycleViewToCache(child);
+                    }
                 }
+
+                Log.d(TAG, "tryCheckChildIsFullOnMeasure size = " + getChildCount());
             }
+
+            isLayout.set(false);
+        }
+    }
+
+    private View tryGetRecycleViewFromCache() {
+        View recycleChild = mRecycler.getFromRecycle();
+        Log.d(TAG, "tryGetRecycleViewFromCache " + recycleChild);
+        return recycleChild;
+    }
+
+    private void tryRecycleViewToCache(View childView) {
+        Log.d(TAG, "tryRecycleViewToCache " + childView);
+        mRecycler.putIntoRecycle(childView);
+    }
+
+    private void tryCheckChildIsFullOnLayout() {
+        if (null == adapter) {
+            return;
+        }
+
+        if (isLayout.compareAndSet(false, true)) {
+
+
+            isLayout.set(false);
+        }
+    }
+
+    private void tryRecycleChildIfPossible() {
+        if (null == adapter) {
+            return;
         }
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mInLayoutFlag.set(true);
 
-        final int offset = this.offset.get();
+        if (mOnLayoutFlag.compareAndSet(false, true)) {
 
-        final int parentLeft = getPaddingLeft();
+            tryCheckChildIsFullOnLayout();
 
-        final int parentTop = getPaddingBottom();
+            final int offset = this.offset.get();
 
-        final int parentWidth = getMeasuredWidth();
+            final int parentLeft = getPaddingLeft();
 
-        final int parentHeight = getMeasuredHeight();
+            final int parentTop = getPaddingBottom();
 
-        for (int index = 0; index < getChildCount(); index++) {
-            final View child = getChildAt(index);
-            if (child.getVisibility() != GONE) {
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            final int parentWidth = getMeasuredWidth();
 
-                final int width = child.getMeasuredWidth();
-                final int height = child.getMeasuredHeight();
+            final int parentHeight = getMeasuredHeight();
 
-                final int childLeft;
-                final int childTop;
+            for (int index = 0; index < getChildCount(); index++) {
+                final View child = getChildAt(index);
+                if (child.getVisibility() != GONE) {
+                    final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-                if (mOrientation == HORIZONTAL) {
-                    childLeft = lp.offset - offset + parentLeft;
-                    childTop = parentTop;
-                } else {
-                    childLeft = parentLeft;
-                    childTop = lp.offset - offset + parentTop;
+                    final int width = child.getMeasuredWidth();
+                    final int height = child.getMeasuredHeight();
+
+                    final int childLeft;
+                    final int childTop;
+
+                    if (mOrientation == HORIZONTAL) {
+                        childLeft = lp.offset - offset + parentLeft;
+                        childTop = parentTop;
+                    } else {
+                        childLeft = parentLeft;
+                        childTop = lp.offset - offset + parentTop;
+                    }
+
+                    child.layout(childLeft, childTop, childLeft + width, childTop + height);
                 }
-
-                child.layout(childLeft, childTop, childLeft + width, childTop + height);
             }
-        }
 
-        mInLayoutFlag.set(false);
+            tryRecycleChildIfPossible();
+
+            mOnLayoutFlag.set(false);
+        }
     }
 
     public void setOnScrollStateChangeListener(OnScrollStateChangeListener onScrollStateChangeListener) {
@@ -154,29 +290,29 @@ public class CenterFocusScrollView extends ViewGroup {
     }
 
     private void notifyViews() {
-        if (null != adapter) {
-
-            int itemCount = adapter.getItemCount();
-
-            for (int index = 0; index < itemCount; index++) {
-                View view = getChildAt(index);
-
-                if (null == view) {
-                    view = adapter.onCreateView(index, this);
-
-                    if (mOrientation == VERTICAL) {
-                        addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-                    } else {
-                        addView(view, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
-                    }
-                }
-
-                adapter.bindView(index, view);
-            }
-
-            requestLayout();
-            invalidate();
-        }
+//        if (null != adapter) {
+//
+//            int itemCount = adapter.getItemCount();
+//
+//            for (int index = 0; index < itemCount; index++) {
+//                View view = getChildAt(index);
+//
+//                if (null == view) {
+//                    view = adapter.onCreateView(index, this);
+//
+//                    if (mOrientation == VERTICAL) {
+//                        addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+//                    } else {
+//                        addView(view, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+//                    }
+//                }
+//
+//                adapter.bindView(index, view);
+//            }
+//
+//            requestLayout();
+//            invalidate();
+//        }
 
     }
 
@@ -426,6 +562,8 @@ public class CenterFocusScrollView extends ViewGroup {
 
         private int offset = 0;
 
+        private int index = -1;
+
         public LayoutParams(int width, int height) {
             super(width, height);
         }
@@ -454,5 +592,28 @@ public class CenterFocusScrollView extends ViewGroup {
 
     public interface OnScrollStateChangeListener {
         void onScrollStateChange(int newState);
+    }
+
+    private class Recycler {
+
+        private final List<View> mRecyclerPool = new ArrayList<>();
+
+        private void putIntoRecycle(View recycleChild) {
+            if (null != recycleChild && !mRecyclerPool.contains(recycleChild)) {
+                mRecyclerPool.add(recycleChild);
+            }
+        }
+
+        synchronized View getFromRecycle() {
+            View childView = null;
+            for (int index = 0; index < mRecyclerPool.size(); index++) {
+                if (mRecyclerPool.get(index) == null){
+                    childView = mRecyclerPool.remove(index);
+                    break;
+                }
+            }
+            return childView;
+        }
+
     }
 }

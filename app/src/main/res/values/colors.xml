@@ -7,4 +7,8 @@
     <color name="tab_floor_unfocus_title_color">#adb7c0</color>
 
     <color name="tab_floor_focus_title_color">#ffffff</color>
+
+    <color name="time_text_color">#a6aab9</color>
+
+    <color name="time_line_color">#99474fa1</color>
 </resources>
