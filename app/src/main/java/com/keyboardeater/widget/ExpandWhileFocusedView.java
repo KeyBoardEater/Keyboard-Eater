@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -17,7 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.keyboardeater.widget.R;
+import androidx.annotation.Nullable;
 
 public class ExpandWhileFocusedView extends LinearLayout {
 
@@ -198,15 +197,15 @@ public class ExpandWhileFocusedView extends LinearLayout {
         }
     }
 
-    public void setIconUrl(String iconUrl){
+    public void setIconUrl(String iconUrl) {
 
     }
 
-    public void setIconSrc(int srcId){
+    public void setIconSrc(int srcId) {
 
     }
 
-    public void setText(String titleText){
+    public void setText(String titleText) {
         titleView.setText(titleText);
     }
 

@@ -4,9 +4,9 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.util.Log
+import androidx.appcompat.widget.AppCompatImageView
 import com.keyboardeater.widget.R
 
 /**
@@ -47,7 +47,7 @@ class RoundConnerImageView : AppCompatImageView {
 
     }
 
-    private fun log(msg: String?) {
+    private fun log(msg: String) {
         Log.d(TAG, msg)
     }
 
@@ -105,7 +105,7 @@ class RoundConnerImageView : AppCompatImageView {
 
                 val rectF = RectF(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), (height - paddingBottom).toFloat())
 
-                mPaint.shader = BitmapShader(drawable2Bitmap(mDrawable, canvas.width, canvas.height), Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+                mPaint.shader = drawable2Bitmap(mDrawable, canvas.width, canvas.height)?.let { BitmapShader(it, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP) }
 
                 if (roundRadius >= 0) {
                     // 绘制四个相同圆角

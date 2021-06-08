@@ -3,8 +3,6 @@ package com.keyboardeater.widget;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
-import android.support.annotation.IntDef;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.FocusFinder;
@@ -13,6 +11,9 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
+
+import androidx.annotation.IntDef;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -607,7 +608,7 @@ public class CenterFocusScrollView extends ViewGroup {
         synchronized View getFromRecycle() {
             View childView = null;
             for (int index = 0; index < mRecyclerPool.size(); index++) {
-                if (mRecyclerPool.get(index) == null){
+                if (mRecyclerPool.get(index) == null) {
                     childView = mRecyclerPool.remove(index);
                     break;
                 }

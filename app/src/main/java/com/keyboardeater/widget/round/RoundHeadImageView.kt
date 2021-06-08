@@ -4,9 +4,9 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.util.Log
+import androidx.appcompat.widget.AppCompatImageView
 import com.keyboardeater.widget.R
 
 /**
@@ -24,24 +24,27 @@ class RoundHeadImageView : AppCompatImageView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
-    private fun log(msg: String?) {
+    private fun log(msg: String) {
         Log.d(TAG, msg)
     }
 
     override fun onDraw(canvas: Canvas) {
-        var mDrawable: Drawable? = drawable
-        val mPaddingTop = paddingTop
-        val mPaddingLeft = paddingLeft
+        val mDrawable: Drawable
 
-        val canvasSize = Math.min(canvas.width, canvas.height)
-
-        if (mDrawable == null) {
+        if (drawable == null) {
             mDrawable = background
             if (mDrawable == null) {
                 // 没有可以绘制的内容
                 return
             }
+        }else{
+            mDrawable = drawable
         }
+
+        val mPaddingTop = paddingTop
+        val mPaddingLeft = paddingLeft
+
+        val canvasSize = Math.min(canvas.width, canvas.height)
 
         val mDrawableWidth = mDrawable.intrinsicWidth
         val mDrawableHeight = mDrawable.intrinsicHeight
@@ -75,7 +78,8 @@ class RoundHeadImageView : AppCompatImageView {
 
             val rectF = RectF(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), (height - paddingBottom).toFloat())
 
-            mPaint.shader = BitmapShader(drawable2Bitmap(mDrawable, canvasSize), Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+
+            mPaint.shader = drawable2Bitmap(mDrawable, canvasSize)?.let { BitmapShader(it, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP) }
 
             if (canvasSize >= 0) {
                 // 绘制四个相同圆角
@@ -87,7 +91,7 @@ class RoundHeadImageView : AppCompatImageView {
 
     }
 
-    private fun drawable2Bitmap(drawable: Drawable?, canvasSize: Int): Bitmap? {
+    private fun drawable2Bitmap(drawable: Drawable, canvasSize: Int): Bitmap? {
         if (drawable == null) {
             return null
         }

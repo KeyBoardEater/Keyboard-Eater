@@ -3,9 +3,7 @@ package com.keyboardeater.widget.activity
 import android.app.Activity
 import android.os.Bundle
 import com.keyboardeater.widget.R
-import com.keyboardeater.widget.ExpandWhileFocusedView
 import com.keyboardeater.widget.adapter.MyTimeLineAdapter
-import com.keyboardeater.widget.timeline.TimeLineLinearLayout
 import com.keyboardeater.widget.timeline.view.TimeLineAdapterView
 
 

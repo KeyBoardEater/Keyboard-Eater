@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
-import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
@@ -16,6 +15,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.keyboardeater.widget.R
 
 class SampleRecyclerViewAdapter(context: Context) : RecyclerView.Adapter<SampleRecyclerViewAdapter.ViewHolder>(), View.OnFocusChangeListener {
@@ -142,7 +142,7 @@ class SampleRecyclerViewAdapter(context: Context) : RecyclerView.Adapter<SampleR
 
     companion object {
 
-        const val TAG = "SampleRecyclerViewAdapter"
+        const val TAG = "SampleRecyclerAdapter"
 
         const val FLOOR_TITLE_HEIGHT = 116
 

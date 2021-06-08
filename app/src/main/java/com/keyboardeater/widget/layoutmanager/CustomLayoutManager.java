@@ -1,15 +1,14 @@
 package com.keyboardeater.widget.layoutmanager;
 
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.List;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.OrientationHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
-import static android.support.v7.widget.RecyclerView.NO_POSITION;
+import java.util.List;
 
 public class CustomLayoutManager extends RecyclerView.LayoutManager {
 
@@ -79,16 +78,16 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
         int extraForStart = mOrientationHelper.getStartAfterPadding();
         int extraForEnd = mOrientationHelper.getEndPadding();
 
-        if (state.isPreLayout()){
+        if (state.isPreLayout()) {
 
             final View existing = findViewByPosition(mPosition);
 
             if (existing != null) {
                 final int current;
                 final int upcomingOffset;
-                    current = mOrientationHelper.getDecoratedStart(existing)
-                            - mOrientationHelper.getStartAfterPadding();
-                    upcomingOffset = mPositionOffset - current;
+                current = mOrientationHelper.getDecoratedStart(existing)
+                        - mOrientationHelper.getStartAfterPadding();
+                upcomingOffset = mPositionOffset - current;
                 if (upcomingOffset > 0) {
                     extraForStart += upcomingOffset;
                 } else {
@@ -99,8 +98,6 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
 
 
         detachAndScrapAttachedViews(recycler);
-
-
 
 
     }

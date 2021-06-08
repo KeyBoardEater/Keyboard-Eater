@@ -1,11 +1,12 @@
 package com.keyboardeater.widget;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import androidx.annotation.NonNull;
+import androidx.core.widget.NestedScrollView;
 
 public class CustomFloorView extends NestedScrollView {
 
