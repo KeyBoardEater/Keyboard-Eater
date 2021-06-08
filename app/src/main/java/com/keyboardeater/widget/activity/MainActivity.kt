@@ -2,9 +2,11 @@ package com.keyboardeater.widget.activity
 
 import android.app.Activity
 import android.os.Bundle
-import android.widget.ImageView
 import com.keyboardeater.widget.R
-import com.keyboardeater.widget.timeline.view.ExpandWhileFocusedView
+import com.keyboardeater.widget.ExpandWhileFocusedView
+import com.keyboardeater.widget.adapter.MyTimeLineAdapter
+import com.keyboardeater.widget.timeline.TimeLineLinearLayout
+import com.keyboardeater.widget.timeline.view.TimeLineAdapterView
 
 
 class MainActivity : Activity() {
@@ -13,10 +15,9 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val expandView = findViewById<ExpandWhileFocusedView>(R.id.expand_view)
-        expandView.setExpandParams(resources.getDimensionPixelSize(R.dimen.expand_view_height),
-                resources.getDimensionPixelSize(R.dimen.expand_view_width),
-                resources.getDimensionPixelSize(R.dimen.expand_view_height)
-        )
+        val timeLineView = findViewById<TimeLineAdapterView>(R.id.my_time_line)
+        val timeLineAdapter = MyTimeLineAdapter()
+        timeLineView.setAdapter(timeLineAdapter)
+
     }
 }

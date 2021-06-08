@@ -1,4 +1,4 @@
-package com.keyboardeater.widget.timeline.view;
+package com.keyboardeater.widget;
 
 import android.animation.ValueAnimator;
 import android.content.Context;

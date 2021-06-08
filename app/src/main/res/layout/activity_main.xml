@@ -9,18 +9,9 @@
     android:background="#44444444"
     android:clipToPadding="false">
 
-    <com.keyboardeater.widget.timeline.view.ExpandWhileFocusedView
-        android:id="@+id/expand_view"
-        android:layout_width="@dimen/expand_view_height"
-        android:focusable="true"
-        android:focusableInTouchMode="false"
-        android:layout_height="@dimen/expand_view_height"/>
-
-    <com.keyboardeater.widget.timeline.view.ExpandWhileFocusedView
-        android:layout_width="@dimen/expand_view_height"
-        android:focusable="true"
-        android:layout_marginTop="10px"
-        android:focusableInTouchMode="false"
-        android:layout_height="@dimen/expand_view_height"/>
+    <com.keyboardeater.widget.timeline.view.TimeLineAdapterView
+        android:id="@+id/my_time_line"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>
