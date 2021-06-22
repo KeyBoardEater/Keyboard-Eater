@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">KeyboardEater</string>
+
+    <string name="toggle_animation">Toggle animation</string>
+
+    <string name="shimmer">Shimmer</string>
 </resources>
