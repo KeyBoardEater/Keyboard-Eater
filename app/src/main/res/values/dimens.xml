@@ -21,4 +21,6 @@
 
     <dimen name="expand_view_stroke">2px</dimen>
 
+    <dimen name="cell_view_selector_stroke_width">4px</dimen>
+
 </resources>
