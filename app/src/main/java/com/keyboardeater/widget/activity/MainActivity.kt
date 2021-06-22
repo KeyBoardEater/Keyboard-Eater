@@ -5,12 +5,16 @@ import android.os.Bundle
 import android.view.View
 import com.key.shimmer.Shimmer
 import com.key.shimmer.ShimmerTextView
+import com.keyboardeater.widget.FocusBackgroundView
+import com.keyboardeater.widget.FocusRotateView
 import com.keyboardeater.widget.R
 
 
 class MainActivity : Activity() {
 
     private var tv: ShimmerTextView? = null
+
+    private var backgroundView: FocusRotateView? = null
 
     private var shimmer: Shimmer? = null
 
@@ -20,6 +24,8 @@ class MainActivity : Activity() {
 
 
         tv = findViewById(R.id.shimmer_tv)
+
+        backgroundView = findViewById(R.id.shimmer_tv_background)
 
 //        val timeLineView = findViewById<TimeLineAdapterView>(R.id.my_time_line)
 //        val timeLineAdapter = MyTimeLineAdapter()
@@ -35,5 +41,7 @@ class MainActivity : Activity() {
             shimmer = Shimmer()
             shimmer!!.start(tv)
         }
+
+        backgroundView?.onParentFocusChanged(true)
     }
 }

@@ -3,20 +3,36 @@
     android:layout_height="match_parent"
     android:background="#242424">
 
-    <com.key.shimmer.ShimmerTextView
-        android:id="@+id/shimmer_tv"
-        android:text="@string/shimmer"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#444"
-        android:textSize="50sp"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center">
+
+        <com.key.shimmer.ShimmerTextView
+            android:id="@+id/shimmer_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@string/shimmer"
+            android:textColor="#444"
+            android:textSize="50sp" />
+
+        <com.keyboardeater.widget.FocusRotateView
+            android:id="@+id/shimmer_tv_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/shimmer_tv"
+            android:layout_alignTop="@id/shimmer_tv"
+            android:layout_alignRight="@id/shimmer_tv"
+            android:layout_alignBottom="@id/shimmer_tv" />
+
+    </RelativeLayout>
 
     <Button
-        android:text="@string/toggle_animation"
-        android:onClick="toggleAnimation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom"
+        android:onClick="toggleAnimation"
+        android:text="@string/toggle_animation" />
 
 </FrameLayout>

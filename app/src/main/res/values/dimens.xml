@@ -23,4 +23,6 @@
 
     <dimen name="cell_view_selector_stroke_width">4px</dimen>
 
+    <dimen name="cell_view_conner">10dp</dimen>
+
 </resources>

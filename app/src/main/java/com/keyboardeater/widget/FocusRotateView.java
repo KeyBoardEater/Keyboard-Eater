@@ -6,12 +6,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
@@ -30,7 +28,7 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
 
     private final int strokeWidth;
 
-    private final @ColorInt
+    private static final @ColorInt
     int[] colors = new int[]{Color.parseColor("#66333333"), Color.parseColor("#66ffffff"),
             Color.parseColor("#cc666666")
     };
@@ -57,7 +55,7 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
         focusAnimator.setRepeatCount(ValueAnimator.INFINITE);
         focusAnimator.setRepeatMode(ValueAnimator.RESTART);
         focusAnimator.setInterpolator(new LinearInterpolator());
-        focusAnimator.setDuration(8000);
+        focusAnimator.setDuration(10000);
         focusAnimator.addUpdateListener(this);
     }
 
@@ -95,6 +93,7 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
 
         mDrawableFocusBg = new StateListDrawable();
         mDrawableFocusBg.addState(new int[]{android.R.attr.state_focused}, mFocusDrawable);
+        mDrawableFocusBg.addState(new int[]{android.R.attr.state_selected}, mFocusDrawable);
         mDrawableFocusBg.addState(new int[]{}, null);
 
         setBackgroundDrawable(mDrawableFocusBg);
@@ -120,6 +119,7 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
 
         mDrawableFocusBg = new StateListDrawable();
         mDrawableFocusBg.addState(new int[]{android.R.attr.state_focused}, mFocusDrawable);
+        mDrawableFocusBg.addState(new int[]{android.R.attr.state_selected}, mFocusDrawable);
         mDrawableFocusBg.addState(new int[]{}, null);
 
         setBackgroundDrawable(mDrawableFocusBg);
@@ -140,6 +140,9 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
     public void onParentFocusChanged(boolean isParentFocused) {
         Log.d(TAG, "onFocusChanged gainFocus = " + isParentFocused);
         this.isParentFocused = isParentFocused;
+
+        setSelected(isParentFocused);
+
         if (isParentFocused) {
             mFocusDrawable.setStartPosition(0);
 
@@ -157,8 +160,6 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
 
     private class SweepFrameDrawable extends Drawable {
 
-        private final int INNER_STROKE_COLOR = Color.parseColor("#999999");
-
         private ColorFilter mColorFilter;   // optional, set by the caller
 
         private int mAlpha = 0xFF;  // modified by the caller
@@ -169,11 +170,7 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
 
         private final Paint mStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-        private final Paint mInnerStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
         private TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-
-        private final Paint mFillShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         private final @ColorInt
         int[] mGradientColors;
@@ -181,18 +178,11 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
         private @ColorInt
         int[] mTempColors;
 
-        private float[] mTempPositions;
-
-        private @ColorInt
-        int[] mTempIronColors;
-
-        private float[] mTempIronPositions;
-
         private final ArgbEvaluator argbEvaluator = new ArgbEvaluator();
 
-        private final RectF mRect = new RectF();
+        private float[] mTempPositions;
 
-        private final RectF mInnerRect = new RectF();
+        private final RectF mRect = new RectF();
 
         private float mStartPosition;
 
@@ -200,25 +190,12 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
 
         public SweepFrameDrawable(int... colors) {
             mGradientColors = colors;
-            mTempIronColors = new int[mGradientColors.length + 2];
-            mTempIronColors[0] = Color.TRANSPARENT;
-            System.arraycopy(mGradientColors, 0, mTempIronColors, 1, mGradientColors.length);
-            mTempIronColors[mGradientColors.length + 1] = Color.TRANSPARENT;
-            mTempIronPositions = new float[mGradientColors.length + 2];
-            mTempIronPositions[0] = 0.0f;
-            mTempIronPositions[mGradientColors.length + 1] = 1.0f;
 
             mStrokePaint.setStyle(Paint.Style.STROKE);
-
-            mInnerStrokePaint.setStyle(Paint.Style.STROKE);
-            mInnerStrokePaint.setColor(INNER_STROKE_COLOR);
-            mInnerStrokePaint.setStrokeWidth(1);
 
             textPaint.setColor(Color.BLACK);
             textPaint.setTextSize(30);
             textPaint.setTextAlign(Paint.Align.CENTER);
-
-            mFillShadowPaint.setStyle(Paint.Style.FILL);
         }
 
         private void ensureSweepRing() {
@@ -231,14 +208,12 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
                     bounds.right + inset, bounds.bottom + inset);
 
 
-            mInnerRect.set(bounds);
+            final RectF r = new RectF(bounds);
 
-            float x0 = mInnerRect.left + mInnerRect.width() * 0.5f;
-            float y0 = mInnerRect.top + mInnerRect.height() * 0.5f;
+            float x0 = r.left + r.width() * 0.5f;
+            float y0 = r.top + r.height() * 0.5f;
 
             float start = getStartPosition();
-
-            float ironStart = start >= 1 / 3f ? -1 : start * 3;
 
             final int length = mGradientColors.length;
 
@@ -282,7 +257,6 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
                 mTempPositions[index] = (float) ((start - Math.floor(start / space) * space + (index - 1) * space) % 1.0f);
                 mPositionStr += mTempPositions[index] + ",";
             }
-
             mTempPositions[length + 1] = 1.0f;
 
             mPositionStr += "1.0f]";
@@ -290,18 +264,6 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
             Log.d(TAG, "ensureSweepRing mColorIndexStr = " + mColorIndexStr + " mTempPositions = " + mPositionStr);
 
             mStrokePaint.setShader(new SweepGradient(x0, y0, mTempColors, mTempPositions));
-
-            if (start == -1) {
-                mFillShadowPaint.setShader(null);
-            } else {
-
-                for (int index = 1; index <= length; index++) {
-                    mTempIronPositions[index] = Math.min(1.0f, ironStart + index * space / length);
-                }
-
-                mFillShadowPaint.setShader(new LinearGradient(mInnerRect.left, mInnerRect.top, mInnerRect.right, mInnerRect.bottom, mTempIronColors, mTempIronPositions, Shader.TileMode.CLAMP));
-
-            }
         }
 
         private int calculateStartColor(float start, int[] mGradientColors) {
@@ -343,10 +305,6 @@ public class FocusRotateView extends FocusBackgroundView implements ValueAnimato
             }
 
             canvas.drawRoundRect(mRect, connerRadius + strokeWidth / 2, connerRadius + strokeWidth / 2, mStrokePaint);
-
-            canvas.drawRoundRect(mInnerRect, connerRadius, connerRadius, mInnerStrokePaint);
-
-            canvas.drawRoundRect(mInnerRect, connerRadius, connerRadius, mFillShadowPaint);
         }
 
         @Override

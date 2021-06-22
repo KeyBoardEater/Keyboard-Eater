@@ -36,6 +36,7 @@ public class FocusBackgroundView extends View {
     public FocusBackgroundView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mTmpRect = new Rect();
+        setRadius(context.getResources().getDimension(R.dimen.cell_view_conner));
     }
 
 
